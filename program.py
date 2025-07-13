@@ -7,7 +7,6 @@
     INCLUDE A FILE CALLED "yesplease.txt".
     THIS WILL ALLOW THIS PROGRAM TO EXIST IN YOUR PC WITHOUT NEEDING TO BE TURNED ON EVERYTIME.
 """
-
 import os
 import sys
 import shutil
@@ -23,7 +22,6 @@ from PIL import ImageTk
 
 file_name = os.path.basename(sys.executable)
 cwd = os.getcwd()
-
 
 # TRANSLATES TO THE LOCAL DIRECTORY OF THE EXECUTABLE
 def local_dir(rel_dir):
@@ -50,10 +48,13 @@ if os.path.exists(f'{cwd}/yesplease.txt') and file_name != 'python.exe':
 KEY_WORD = "GASTER"
 token = ""
 
+show_gif = False
+
 timeElapsed = 0
 frame_index = 0
 # CALLBACK WHEN THE KEY WORD IS TYPED.
 def on_keyword_typed():
+    global show_gif
     global timeElapsed
     global frame_index
     global update_animation
@@ -83,6 +84,7 @@ def on_press(e):
 def on_exit():
     global root
     global quitting
+    play(local_dir('assets\\snd_ominous_cancel.wav'), engine=Engine.WINSOUND, async_mode=False)
     quitting = True
     root.destroy()
     stop_all()
@@ -91,7 +93,7 @@ def on_exit():
 # ADDS THE CALLBACK FOR KEYSTROKES
 keyboard.on_press(on_press)
 keyboard.add_hotkey('Ctrl+Shift+6', on_exit)
-image = Image.open(local_dir('assets\\caption.gif'))
+funny_gif = Image.open(local_dir('assets\\caption.gif'))
 
 root = Tk()
 root.title("WHEN I")
@@ -101,12 +103,12 @@ root.overrideredirect(True)
 root.wm_attributes('-transparentcolor', 'green')
 root.wm_attributes('-topmost', 1)
 
+img_frames = [ImageTk.PhotoImage(frame.convert('RGBA')) for frame in ImageSequence.Iterator(funny_gif)]
 screen_size = (root.winfo_screenwidth(), root.winfo_screenheight())
 
-canvas = Canvas(root, offset="200,200", width=screen_size[0], height=screen_size[1], bg="green", highlightthickness=0)
+canvas = Canvas(root, offset="0,0", width=screen_size[0], height=screen_size[1], bg="green", highlightthickness=0)
 canvas.pack()
 
-img_frames = [ImageTk.PhotoImage(frame.convert('RGBA')) for frame in ImageSequence.Iterator(image)]
 
 quitting = False
 sound = None
@@ -118,8 +120,7 @@ def update_animation():
     if quitting or timeElapsed >= 9000:
         stop(sound)
         return
-
-    canvas.create_image(screen_size[0]/2 - image.width/2,screen_size[1]/2-image.height/2, anchor=NW, image=img_frames[frame_index])
+    canvas.create_image(screen_size[0]/2 - funny_gif.width/2,screen_size[1]/2-funny_gif.height/2, anchor=NW, image=img_frames[frame_index])
     if frame_index == 0 and timeElapsed == 0:
         sound = play(local_dir('assets\\mus_st_him.wav'), engine=Engine.WINSOUND, async_mode=True, loop=True)
     timeElapsed += 30
